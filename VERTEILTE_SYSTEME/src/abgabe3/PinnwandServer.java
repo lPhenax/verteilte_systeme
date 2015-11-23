@@ -3,6 +3,8 @@ package abgabe3;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.rmi.server.RemoteServer;
+import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 
 /**
@@ -27,9 +29,18 @@ public class PinnwandServer extends UnicastRemoteObject implements Pinnwand {
     @Override
     public int login(String password) throws RemoteException {
         if (password.equals(Password)) {
+            session();
             return 1;
         }
         return -1;
+    }
+
+    private void session() {
+        try {
+            System.out.println(RemoteServer.getClientHost());
+        } catch (ServerNotActiveException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
