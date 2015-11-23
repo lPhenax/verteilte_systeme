@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.ServerNotActiveException;
 
 /**
  * Created by Daniel & Andreas on 11.11.2015.
@@ -62,6 +63,8 @@ public class PinnwandClient {
             }
         } catch (IOException ex) {
             System.err.println("Bei der Eingabe ist etwas schiefgegangen!");
+        } catch (ServerNotActiveException e) {
+            System.err.println("erneut anmelden...\n" + e.getMessage());
         }
         return false;
     }
