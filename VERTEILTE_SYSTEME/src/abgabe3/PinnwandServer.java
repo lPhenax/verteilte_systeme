@@ -49,10 +49,6 @@ public class PinnwandServer extends UnicastRemoteObject implements Pinnwand {
             try {
                 for (long i = sessionLifetime; i >= 0; i--) {
                     Thread.sleep(1000);
-                    /*
-                    Die Sessions des Users laufen jetzt nur 6s(bisher).
-                    TODO: Updater einbauen.
-                     */
                     if (i == 0) {
                         sessionMemory.remove(user);
                         System.out.println(user + " wurde ausgeloggt.");
