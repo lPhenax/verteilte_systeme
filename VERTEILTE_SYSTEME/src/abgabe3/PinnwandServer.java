@@ -22,7 +22,7 @@ public class PinnwandServer extends UnicastRemoteObject implements Pinnwand {
     private static int nfi = 0;
     private static String[] messageMemory = new String[maxNumMessages];
     private static ArrayList<String> sessionMemory = new ArrayList<>();
-    private static final long sessionLifetime = 6;
+    private static final long sessionLifetime = 60;
 
     protected PinnwandServer() throws RemoteException {
         super();
@@ -66,57 +66,89 @@ public class PinnwandServer extends UnicastRemoteObject implements Pinnwand {
 
     @Override
     public int getMessageCount() throws RemoteException {
-        /*for(int i = 0; i < sessionMemory.size(); i++){
-            try {
-                if(sessionMemory.get(i).equals(RemoteServer.getClientHost()))
-            } catch (ServerNotActiveException e) {
-                e.printStackTrace();
+        if (isLoggedIn()) {
+            somethingDone();
+            int msgCount = 0;
+            for (String msg : messageMemory) {
+                if (msg != null) msgCount++;
             }
-        }*/
-        int msgCount = 0;
-        for (String msg : messageMemory) {
-            if (msg != null) msgCount++;
+            return msgCount;
         }
-        return msgCount;
+        return -1;
     }
 
     @Override
     public String[] getMessages() throws RemoteException {
-        return messageMemory;
+        if (isLoggedIn()) {
+            somethingDone();
+            return messageMemory;
+        }
+        return null;
     }
 
     @Override
     public String getMessage(int index) throws RemoteException {
-        return messageMemory[index];
+        if (isLoggedIn()) {
+            somethingDone();
+            return messageMemory[index];
+
+        }
+        return null;
     }
 
     @Override
     public boolean putMessage(String msg) throws RemoteException {
-        if (msg.length() <= maxLengthMessage && getMessageCount() <= maxNumMessages && nfi < maxNumMessages) {
-            messageMemory[nfi] = msg;
-            nfi++;
-            Thread t = new Thread(() -> {
-                try {
-                    Thread.sleep(messageLifetime);
-                    for (int i = 0; i < messageMemory.length - 1; i++) {
-                        messageMemory[i] = messageMemory[i + 1];
-                        if (i == messageMemory.length - 2) {
-                            messageMemory[i + 1] = null;
+        if (isLoggedIn()) {
+            if (msg.length() <= maxLengthMessage && getMessageCount() <= maxNumMessages && nfi < maxNumMessages) {
+                messageMemory[nfi] = msg;
+                nfi++;
+                Thread t = new Thread(() -> {
+                    try {
+                        Thread.sleep(messageLifetime);
+                        for (int i = 0; i < messageMemory.length - 1; i++) {
+                            messageMemory[i] = messageMemory[i + 1];
+                            if (i == messageMemory.length - 2) {
+                                messageMemory[i + 1] = null;
+                            }
                         }
+                        //System.arraycopy(messageMemory, 0, messageMemory, 1, messageMemory.length - 1);
+                        nfi--;
+                        somethingDone();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    //System.arraycopy(messageMemory, 0, messageMemory, 1, messageMemory.length - 1);
-                    nfi--;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
-            });
-            t.start();
-            return true;
+                });
+                t.start();
+                return true;
+            }
         }
         return false;
     }
 
+    public void somethingDone() {
+
+        try {
+            session();
+        } catch (ServerNotActiveException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public boolean isLoggedIn() {
+        for (String aSessionMemory : sessionMemory) {
+            try {
+                if (aSessionMemory.equals(RemoteServer.getClientHost())) {
+                    return true;
+                }
+            } catch (ServerNotActiveException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
 
     public static void main(String[] args) {
         try {

@@ -96,6 +96,14 @@ public class PinnwandClient {
      */
     String ueberpruefeBefehl(String befehl) {
 
+        try {
+            if(pinnwand.getMessageCount()==-1) {
+                System.out.println("Sie waren zu lange inaktiv und wurden ausgeloggt!");
+                login();
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         if (befehl.equalsIgnoreCase("ende")) ende();
         if (befehl.equalsIgnoreCase("anzahl")) nachrichtenZaehler();
         if (befehl.equalsIgnoreCase("alleMsg")) alleNachrichten();
