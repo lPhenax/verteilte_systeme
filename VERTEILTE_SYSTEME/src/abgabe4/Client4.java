@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.Socket;
 
 /**
- * Created by Phenax on 30.11.2015.
+ * Created by Burger & Schleußner on 30.11.2015.
  */
 public class Client4 {
 
@@ -24,25 +24,55 @@ public class Client4 {
 
         Socket skt = null;
         try {
-            System.out.println("Herzlich Willkommen auf der Mini Mailbox =D !");
             System.out.println("Geben Sie bitte eine g\u00FCltige Ip an.");
             System.out.println("Keine Eingabe bedeutet Localhost.");
             System.out.print("$> ");
             String ip = br.readLine();
-            if (ip != null) {
-                skt = new Socket(ip, 5678);
-            } else {
-                skt = new Socket("127.0.0.1", 5678);
+            System.out.println("Geben Sie bitte eine Portnummer an.");
+            System.out.println("Keine Eingabe bedeutet 8090.");
+            System.out.print("$> ");
+            String portEingabe = br.readLine();
+
+            int port = 0;
+            int socket = 0;
+            if(!ip.isEmpty() && !portEingabe.isEmpty()) {
+                port = Integer.parseInt(portEingabe);
+                socket = 1;
             }
+            if(ip.isEmpty() && !portEingabe.isEmpty()) {
+                port = Integer.parseInt(portEingabe);
+                socket = 2;
+            }
+            if(!ip.isEmpty() && portEingabe.isEmpty()) socket = 3;
+
+            switch(socket){
+                case 1:
+                    skt = new Socket(ip, port);
+                    break;
+                case 2:
+                    skt = new Socket("127.0.0.1", port);
+                    break;
+                case 3:
+                    skt = new Socket(ip, 8090);
+                    break;
+                default:
+                    skt = new Socket("127.0.0.1", 8090);
+                    break;
+            }
+            System.out.println("Sie versuchen sich mit der Adresse " + skt.getInetAddress() + ":" + skt.getPort() +
+                    " bei der Mini Mailbox anzumelden.");
         } catch (IOException e) {
-            System.err.println("Der Client konnte sich nicht anmelden!");
+            System.err.println("Der Client konnte sich nicht anmelden, da der Server noch nich on ist!");
             clientKlasse();
         }
-        System.out.println("angemeldet!");
-        hilfe(skt);
+
+        final Socket finalSkt = skt;
+        new Thread(() -> leseNachrichten(finalSkt, Thread.currentThread())).start();
+
         erstelleNachricht(skt);
 
         try {
+            assert skt != null;
             skt.close();
         } catch (IOException e) {
             System.err.println("Der Client konnte nicht geschlossen werden!");
@@ -57,16 +87,8 @@ public class Client4 {
      */
     void erstelleNachricht(Socket skt) {
         try {
-            int zuBerechnendeZahl = -2;
-
-            //Befehle werden erstellt und zuBerechnendeZahl kann nur eine Zahl enthalten
-            zuBerechnendeZahl = erstelleBefehl(skt);
-            //zuBerechnendeZahl wird an den Server gesendet
-            schickeNachrichten(skt, zuBerechnendeZahl);
-            //vom Server berechnete Fibonaccizahl wird gelesen und ausgegeben auf der Konsole
-            System.out.println("Zahl die berechnet werden soll ist: ' " + zuBerechnendeZahl + "'.\n" +
-                    "Antwort vom Server: '" + leseNachrichten(skt) + "'.");
-            //es ist alles korrekt gelaufen und es kann wieder eine Nachricht f�r den Server erstellt werden
+            String befehl = erstelleBefehl(skt);
+            schickeNachrichten(skt, befehl);
             erstelleNachricht(skt);
         } catch (Exception ex) {
             System.out.println("Fehlercode: -3\n" +
@@ -74,9 +96,9 @@ public class Client4 {
             System.out.println("Soll das Programm beendet werden? (Y/N)");
             try {
                 String programmBeenden = br.readLine();
-                if (programmBeenden.equalsIgnoreCase("y")) ende();
+                if (programmBeenden.equalsIgnoreCase("y")) schickeNachrichten(skt, "exit");
                 if (programmBeenden.equalsIgnoreCase("n")) erstelleNachricht(skt);
-                System.out.println("Die Eingabe wurde jetzt als 'nein' interpretiert und auf 'erstelleNachricht'" +
+                System.out.println("_Die Eingabe wurde jetzt als 'nein' interpretiert und auf 'erstelleNachricht'" +
                         " zur\u00FCckgesetzt!");
             } catch (IOException e) {
                 System.err.println("Beim Schreiben in die Konsole ist etwas schiefgegangen...sorry...");
@@ -90,79 +112,33 @@ public class Client4 {
      * @param skt Serveradresse
      * @return eine Zahl die an dem Server �bergeben werden soll
      */
-    int erstelleBefehl(Socket skt) {
-        System.out.println("Geben Sie bitte eine Zahl, die als Fibonacci-Zahl berechnet werden soll, ein:");
+    String erstelleBefehl(Socket skt) {
         System.out.print("$> ");
-        String befehl = "keine Nachricht erstellt..";
-        int zahl = 0;
+        String befehl = "";
         try {
             befehl = br.readLine();
+            if(befehl.isEmpty()) erstelleNachricht(skt);
+
         } catch (IOException ioEx) {
             System.err.println("Beim Schreiben in die Konsole ist etwas schiefgegangen...sorry...");
         }
-        zahl = ueberpruefeNachicht(skt, befehl);
-        return zahl;
-    }
-
-    /**
-     * �berpr�ft die Konsolenbefehle und ruft entsprechende Aktionen auf oder return eine Zahl.
-     *
-     * @param skt    Serveradresse
-     * @param befehl der �berpr�ft werden soll
-     * @return eine Zahl im Berecih von 1 - 99 die zum Berechnen an den Server gesendet werden soll
-     */
-    int ueberpruefeNachicht(Socket skt, String befehl) {
-
-        int ueberpruefteZahl = 0;
-        if (befehl.equalsIgnoreCase("ende")) ende();
-        if (befehl.equalsIgnoreCase("hilfe")) hilfe(skt);
-        if (befehl.toLowerCase().startsWith("berechne")) {
-            try {
-                //in ueberpruefteZahl wird eine Zahl eingetragen, wenn es kein nat�rlich zahl ist,
-                //tritt ein Fehler auf
-                ueberpruefteZahl = Integer.parseInt(befehl.split(" ")[1]);
-
-                //Werteberecih �berpr�fen
-                //auskommentiert, sonst hat der Server bei Fehlern beim Befehl gar nichts zu tun..
-                /*if (ueberpruefteZahl < 1 || ueberpruefteZahl > 99) {
-                    System.out.println("(-2) \nDie Zahl sollte sich im Bereich zwischen 1 und 99 befinden" +
-                            "! --> ung\u00FCltiger Zahlenbereich!");
-                    return -2;
-                }*/
-
-            } catch (Exception ex) {
-                int fehler = -1;
-                System.out.println("(-1) - Fehler abgefangen bevor die Nachricht an den Server geht. \n" +
-                        "Das war keine nat\u00FCrliche Zahl!\n" +
-                        "Es wird die Hilfe aufgerufen.");
-                //System.out.println("Die ausgehende Nachricht sollte : '" + s + "' sein. --> Fehlercode -1");
-                hilfe(skt);
-                return fehler;
-            }
-        } else {
-            //Befehl 'berechne' wurde falsch geschrieben...
-            System.out.println("(-1) - Fehler abgefangen bevor die Nachricht an den Server geht. \n" +
-                    "Der Befehl 'berechne' wurde falsch geschrieben.\n" +
-                    "Es wird die Hilfe aufgerufen.");
-            hilfe(skt);
-            return -1;
-        }
-        return ueberpruefteZahl;
+        return befehl;
     }
 
     /**
      * schickeNachrichten soll Nachrichten vom Client an den Server senden.
      *
      * @param skt               Serveradresse
-     * @param zuBerechnendeZahl die Zahl, die vom Server berechnet werden soll
      * @throws IOException wird in erstelleNachricht gefangen und ausgewertet
      */
-    void schickeNachrichten(Socket skt, int zuBerechnendeZahl) throws IOException {
-        OutputStream os = skt.getOutputStream();
-        DataOutputStream don = new DataOutputStream(os);
-        don.writeInt(zuBerechnendeZahl);
-        don.flush();
-        //System.out.println("gesendet..");
+    void schickeNachrichten(Socket skt, String nachricht) {
+        try {
+            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(skt.getOutputStream()));
+            printWriter.print(nachricht);
+            printWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -172,54 +148,28 @@ public class Client4 {
      * @return die Antwort vom Server
      * @throws IOException wird in erstelleNachricht gefangen und ausgewertet
      */
-    int leseNachrichten(Socket skt) throws IOException {
-        InputStream is = skt.getInputStream();
-        DataInputStream din = new DataInputStream(is);
-        //System.out.println("lese..");
-        int fibo = din.readInt();
-        // erste if-Anweisungen wird nicht aufgerufen (da vorher abgefangen!), ist aber vorhanden
-        if (fibo == -1) {
-            System.out.println("Fehlercode: -1\n" +
-                    "Grund: 'Es war keine nat\u00FCrliche Zahl!'");
-            erstelleNachricht(skt);
-        }
-        if (fibo == -2) {
-            System.out.println("Fehlercode: -2\n" +
-                    "Grund: 'Ung\u00FCltiger Zahlenbereich! [1 - 99]'");
-            erstelleNachricht(skt);
-        }
-
-        return fibo;
-    }
-
-    /**
-     * L�st Konsolenausgaben aus die dem Client die m�glichen Befehle anzeigt.
-     *
-     * @param skt Serveradresse
-     */
-    void hilfe(Socket skt) {
-        //System.out.println("Hilfe...");
-        // Eingabem�glichkeiten auf der Konsole ausgeben und dem Client anweisen wieder eine
-        // Konsoleneingabe zu t�tigen
-        System.out.println("m\u00F6gliche Befehle:\n\n" +
-                "hilfe           - Bedienungshilfe wird ausgegeben\n" +
-                "berechne <zahl> - berechnet fibonacci f\u00FCr <zahl>\n" +
-                "ende            - beendet die Anwendung\n");
-        erstelleNachricht(skt);
-    }
-
-    /**
-     * Beendet die Anwendung.
-     */
-    void ende() {
-        System.out.println("Die Anwendung wird beendet. Bis zum n\u00E4chsten mal.");
+    void leseNachrichten(Socket skt, Thread thread){
+        String mail = "";
         try {
-            br.close();
-        } catch (IOException e) {
-            System.err.println("Der Schreibemechanismus in 'erstelleBefehl' konnte nicht geschlossen werden ");
+            BufferedReader br = new BufferedReader(new InputStreamReader(skt.getInputStream()));
+            char[] buffer = new char[2000];
+            int anzahlZeichen = br.read(buffer, 0, 2000); // blockiert bis empfangen Nachricht
+            mail = new String(buffer, 0, anzahlZeichen);
+            System.out.println(mail);
+            if(mail.startsWith("Bis zum n")){
+                System.out.println("abgemeldet..");
+//                thread.stop();
+                Runtime.getRuntime().exit(0);
+            }
+
+            leseNachrichten(skt, thread);
+
+        } catch (IOException e){
+            System.out.println("Beim Lesen ist etwas schiefgegangen oder Sie haben sich abgemeldet :/");
+            System.out.println("Verbindung zum Server verloren, Anwendung wird beendet.");
+//            thread.stop();
+            Runtime.getRuntime().exit(0);
         }
-        Runtime.getRuntime().exit(0);
 
     }
-
 }
