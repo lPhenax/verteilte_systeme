@@ -1,6 +1,7 @@
 package abgabe4;
 
-import java.security.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -11,14 +12,17 @@ import java.util.Date;
 /////////////////////////////////////////////////////////////////
 public class Time {
     private long time;
+    Calendar cal = Calendar.getInstance();
+    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:SS");
 
     public Time(){
         this.time = new Date().getTime();
     }
 
 
-    public long getTime() {
-        return time;
+    public String getTime() {
+
+        return sdf.format(time);
     }
 }
 
