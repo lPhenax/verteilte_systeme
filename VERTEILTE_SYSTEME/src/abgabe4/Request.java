@@ -1,12 +1,5 @@
 package abgabe4;
 
-import com.google.gson.Gson;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
-
-
 /**
  * Created by Phenax on 19.12.2015.
  */
@@ -14,39 +7,21 @@ public class Request {
 
     private int sequence;
     private String command;
-    private ArrayList<String> params;
+    private String[] params;
 
     public Request() {
-        this.sequence = 0;
+        this.sequence = (int)Math.random()*1000;
     }
 
-    public Request(String command, ArrayList<String> params) {
+    public Request(String command, String[] params) {
         this.command = command;
         this.params = params;
     }
 
-    protected String toJson(String request){
-        Scanner scan = new Scanner(request);
-        String msg = "";
-        String sendTo = "";
-        ArrayList<String> args = new ArrayList<>();
-        if (request.contains("msg")){
-            request = scan.next();
-
-            sendTo = scan.next();
-            System.out.println(sendTo + ": I want to send to");
-            args.add(sendTo);
-            while(scan.hasNext()){
-                msg = " " +  msg.concat(scan.next());
-            }
-        }
-        System.out.println(msg);
-        args.add(msg);
-        System.out.println(request);
-        Request requ = new Request(request , args);
-        Gson gson = new Gson();
-        String message = gson.toJson(requ);
-        return message;
+    public Request(int sequence, String command, String[] params) {
+        this.sequence = sequence;
+        this.command = command;
+        this.params = params;
     }
 
     public int getSequence() {
@@ -65,11 +40,11 @@ public class Request {
         this.command = command;
     }
 
-    public ArrayList<String> getParams() {
+    public String[] getParams() {
         return params;
     }
 
-    public void setParams(ArrayList<String> params) {
+    public void setParams(String[] params) {
         this.params = params;
     }
 

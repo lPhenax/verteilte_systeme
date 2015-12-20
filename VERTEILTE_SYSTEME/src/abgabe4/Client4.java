@@ -35,17 +35,17 @@ public class Client4 {
 
             int port = 0;
             int socket = 0;
-            if(!ip.isEmpty() && !portEingabe.isEmpty()) {
+            if (!ip.isEmpty() && !portEingabe.isEmpty()) {
                 port = Integer.parseInt(portEingabe);
                 socket = 1;
             }
-            if(ip.isEmpty() && !portEingabe.isEmpty()) {
+            if (ip.isEmpty() && !portEingabe.isEmpty()) {
                 port = Integer.parseInt(portEingabe);
                 socket = 2;
             }
-            if(!ip.isEmpty() && portEingabe.isEmpty()) socket = 3;
+            if (!ip.isEmpty() && portEingabe.isEmpty()) socket = 3;
 
-            switch(socket){
+            switch (socket) {
                 case 1:
                     skt = new Socket(ip, port);
                     break;
@@ -117,7 +117,7 @@ public class Client4 {
         String befehl = "";
         try {
             befehl = br.readLine();
-            if(befehl.isEmpty()) erstelleNachricht(skt);
+            if (befehl.isEmpty()) erstelleNachricht(skt);
 
         } catch (IOException ioEx) {
             System.err.println("Beim Schreiben in die Konsole ist etwas schiefgegangen...sorry...");
@@ -128,14 +128,35 @@ public class Client4 {
     /**
      * schickeNachrichten soll Nachrichten vom Client an den Server senden.
      *
-     * @param skt               Serveradresse
+     * @param skt Serveradresse
      * @throws IOException wird in erstelleNachricht gefangen und ausgewertet
      */
     void schickeNachrichten(Socket skt, String nachricht) {
         try {
+//            String command = nachricht.split(" ")[0];
+//            if(command.equals("msg")){
+//                String empfänger = nachricht.split(" ")[1];
+////                System.out.println(nachricht);
+//                nachricht = nachricht.replace("msg ", "");
+////                System.out.println(nachricht);
+//                nachricht = nachricht.replace(empfänger+" ", "");
+////                System.out.println(nachricht);
+//
+//                String[] params = {empfänger, nachricht};
+//
+//                Request req = new Request();
+//                req.setCommand(command);
+//                req.setParams(params);
+//                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(skt.getOutputStream()));
+//                Gson gsBuilder = new GsonBuilder().create();
+//                gsBuilder.toJson(req, bw);
+//                bw.close();
+//
+//            } else {
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(skt.getOutputStream()));
             printWriter.print(nachricht);
             printWriter.flush();
+//            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -148,7 +169,7 @@ public class Client4 {
      * @return die Antwort vom Server
      * @throws IOException wird in erstelleNachricht gefangen und ausgewertet
      */
-    void leseNachrichten(Socket skt, Thread thread){
+    void leseNachrichten(Socket skt, Thread thread) {
         String mail = "";
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(skt.getInputStream()));
@@ -156,7 +177,7 @@ public class Client4 {
             int anzahlZeichen = br.read(buffer, 0, 2000); // blockiert bis empfangen Nachricht
             mail = new String(buffer, 0, anzahlZeichen);
             System.out.println(mail);
-            if(mail.startsWith("Bis zum n")){
+            if (mail.startsWith("Bis zum n")) {
                 System.out.println("abgemeldet..");
 //                thread.stop();
                 Runtime.getRuntime().exit(0);
@@ -164,12 +185,23 @@ public class Client4 {
 
             leseNachrichten(skt, thread);
 
-        } catch (IOException e){
+        } catch (IOException e) {
+//            try {
+//                System.out.println("Er ist wieder da!");
+//                BufferedReader br = new BufferedReader(new InputStreamReader(skt.getInputStream()));
+//                Gson gson = new Gson();
+//                Response response = gson.fromJson(br, Response.class);
+//                System.out.println(response);
+//                String[] resParams = response.getRes();
+//                System.out.println(resParams);
+//                String msg = resParams[1];
+//                System.out.println(msg);
+//            } catch (IOException e1) {
             System.out.println("Beim Lesen ist etwas schiefgegangen oder Sie haben sich abgemeldet :/");
             System.out.println("Verbindung zum Server verloren, Anwendung wird beendet.");
 //            thread.stop();
             Runtime.getRuntime().exit(0);
+//            }
         }
-
     }
 }
