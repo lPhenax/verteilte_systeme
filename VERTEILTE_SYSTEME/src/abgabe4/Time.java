@@ -13,7 +13,7 @@ import java.util.Date;
 public class Time {
     private long time;
     Calendar cal = Calendar.getInstance();
-    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:SS");
+    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
     public Time(){
         this.time = new Date().getTime();
