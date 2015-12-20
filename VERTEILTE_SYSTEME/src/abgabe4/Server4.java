@@ -1,8 +1,5 @@
 package abgabe4;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -123,8 +120,11 @@ public class Server4 {
             if (!user.getSocket().isClosed()) {
                 warteAufBefehl(user, br, thread);
             }
-        } catch (IOException e) {
-//            System.out.println(user.getName() + " hat ein Request geschickt.");
+        } catch (Exception e) {
+            System.out.println("User is raus");
+            //userList.remove(user);
+            ende(user, thread);
+// System.out.println(user.getName() + " hat ein Request geschickt.");
 //            if (isLogedIn(user)) {
 //                nachricht(user, "");
 //            } else {
@@ -146,11 +146,11 @@ public class Server4 {
 //        }
         String command = befehl.split(" ")[0];
         String otherUserName = befehl.split(" ")[1];
-        System.out.println(befehl);
+//        System.out.println(befehl);
         befehl = befehl.replace(command + " ", "");
-        System.out.println(befehl);
+//        System.out.println(befehl);
         befehl = befehl.replace(otherUserName + " ", "");
-        System.out.println(befehl);
+//        System.out.println(befehl);
 
         Time time = new Time();
 
@@ -158,23 +158,37 @@ public class Server4 {
             schickeNachrichtAnClient(user.getSocket(), "So geht´s nich, meen Jung! " +
                     "Sie k\u00D6nnen sich nicht selber schreiben..");
         } else {
+            int index = 0;
             for (User u : userList) {
+                System.out.println(otherUserName);
+                System.out.println(u.getName());
                 if (otherUserName.equals("all")) {
 //                        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(u.getSocket().getOutputStream()));
 //                        gsBuilder.toJson(response, bw);
 //                        bw.flush();
-                    schickeNachrichtAnClient(user.getSocket(),
-                            user.getName() + " hat ihnen eine Nachricht geschickt.\n" + befehl + "\n" + time.getTime());
-                } else if (u.getName().equals(otherUserName)) {
+                    if (!(u.getName().equals(user.getName()))) {
+                        schickeNachrichtAnClient(u.getSocket(),
+                                time.getTime() + " " + user.getName() +
+                                        " hat ihnen eine Nachricht geschickt.\n" + befehl + "\n");
+                    continue;
+                    }
+
+
+                }
+                if (u.getName().equals(otherUserName)) {
 //                        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(u.getSocket().getOutputStream()));
 //                        gsBuilder.toJson(response, bw);
 //                        bw.flush();
-
-                    schickeNachrichtAnClient(user.getSocket(),
-                            user.getName() + " hat ihnen eine Nachricht geschickt.\n" + befehl + "\n" + time.getTime());
-                } else {
+                    schickeNachrichtAnClient(u.getSocket(),
+                            time.getTime() + " " + user.getName() +
+                                    " hat ihnen eine Nachricht geschickt.\n" + befehl + "\n");
+                    break;
+                }
+                index++;
+                if (index == userList.size() || userList.size() != 1) {
                     schickeNachrichtAnClient(user.getSocket(), "Der angegebene Benutzername existiert nicht.");
                 }
+
             }
 
         }
@@ -285,7 +299,7 @@ public class Server4 {
     private static void werIstAllesEingeloggt(User user) {
         for (User u : userList) {
             //vllt muss man an dieser Stelle nochmal umschreiben um eine schönere Ausgabe zu erhalten
-            schickeNachrichtAnClient(user.getSocket(), u.getName());
+            schickeNachrichtAnClient(user.getSocket(), u.getName() + ", ");
         }
     }
 
