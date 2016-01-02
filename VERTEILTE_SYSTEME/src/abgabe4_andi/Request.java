@@ -1,4 +1,4 @@
-package abgabe4_andi.abgabe4;
+package abgabe4_andi;
 
 /**
  * Created by Burger & Schleußner on 30.11.2015.

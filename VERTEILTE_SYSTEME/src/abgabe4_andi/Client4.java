@@ -1,4 +1,4 @@
-package abgabe4_andi.abgabe4;
+package abgabe4_andi;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -97,22 +97,28 @@ public class Client4 {
     void erstelleNachricht(Socket skt) {
         try {
 
-
+            Request request = erstelleBefehl(skt);
+            schickeNachrichten(skt, request);
+            erstelleNachricht(skt);
 //            String befehl = erstelleBefehl(skt);
 //            schickeNachrichten(skt, befehl);
 //            erstelleNachricht(skt);
         } catch (Exception ex) {
+            System.out.println(ex);
             System.out.println("Fehlercode: -3\n" +
                     "Grund: 'Der Server ist down!'");
             System.out.println("Soll das Programm beendet werden? (Y/N)");
             try {
                 String programmBeenden = br.readLine();
+                System.out.println(programmBeenden);
                 if (programmBeenden.equalsIgnoreCase("y")) {
                     schickeNachrichten(skt, new Request("exit", null));
+                    br.close();
                 }
                 if (programmBeenden.equalsIgnoreCase("n")) erstelleNachricht(skt);
                 System.out.println("_Die Eingabe wurde jetzt als 'nein' interpretiert und auf 'erstelleNachricht'" +
                         " zur\u00FCckgesetzt!");
+                br.close();
             } catch (IOException e) {
                 System.err.println("Beim Schreiben in die Konsole ist etwas schiefgegangen...sorry...");
             }
@@ -136,10 +142,11 @@ public class Client4 {
             req = new Request();
             String befehl = nachricht.split(" ")[0];
             req.setCommand(befehl);
-
-            for(int i = 0; i < nachricht.length(); i++){
-                parms[i] = nachricht.split(" ")[i+1];
-            }
+            parms = new String[1];
+            parms[0] = nachricht.replace(befehl + " ", "");
+//            for(int i = 0; i < nachricht.length(); i++){
+//                parms[i] = nachricht.split(" ")[i+1];
+//            }
 
             req.setParams(parms);
 
@@ -160,11 +167,11 @@ public class Client4 {
 //            String command = nachricht.split(" ")[0];
 //            if(command.equals("msg")){
 //                String empfänger = nachricht.split(" ")[1];
-////                System.out.println(nachricht);
+//                System.out.println(nachricht);
 //                nachricht = nachricht.replace("msg ", "");
-////                System.out.println(nachricht);
+//                System.out.println(nachricht);
 //                nachricht = nachricht.replace(empfänger+" ", "");
-////                System.out.println(nachricht);
+//                System.out.println(nachricht);
 //
 //                String[] params = {empfänger, nachricht};
 //
@@ -200,13 +207,23 @@ public class Client4 {
             char[] buffer = new char[2000];
             int anzahlZeichen = br.read(buffer, 0, 2000); // blockiert bis empfangen Nachricht
             mail = new String(buffer, 0, anzahlZeichen);
-            System.out.println(mail);
-            if (mail.startsWith("Bis zum n")) {
-                System.out.println("abgemeldet..");
-//                thread.stop();
-                Runtime.getRuntime().exit(0);
-            }
+            Response response = gson.fromJson(mail, Response.class);
+            System.out.println("Antwort des Servers: " + response);
+            if (response.getRes() != null) {
 
+                if (response.getRes()[0].startsWith("Bis zum n")) {
+                    System.out.println("abgemeldet..");
+//                thread.stop();
+                    Runtime.getRuntime().exit(0);
+                }
+
+            } else {
+                System.out.println("leer");
+            }
+            /**
+             TODO: Hier läuft was schief
+             Der Thread scheißt ne Exception
+             */
             leseNachrichten(skt, thread);
 
         } catch (IOException e) {

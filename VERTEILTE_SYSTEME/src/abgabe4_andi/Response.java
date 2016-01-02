@@ -1,4 +1,4 @@
-package abgabe4_andi.abgabe4;
+package abgabe4_andi;
 
 import java.util.Arrays;
 
