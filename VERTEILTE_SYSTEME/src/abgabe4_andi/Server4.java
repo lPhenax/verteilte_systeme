@@ -20,7 +20,7 @@ public class Server4 {
     private Gson gson = new Gson();
     private Gson gsbu = new GsonBuilder().create();
     private Response response = new Response(0, 0, null);
-    private String[] antwort;
+    private String[] antwort = new String[5];
 
     public static void main(String[] args) {
         new Server4();
@@ -61,7 +61,6 @@ public class Server4 {
             } else {
                 antwort[0] = "Alle Pl\u00E3tze sind belegt, sorry";
                 Response maxUser = new Response(503, 0, antwort);
-//                schickeNachrichtAnClient(uSkt, "Alle Pl\u00E3tze sind belegt, sorry");
                 schickeNachrichtAnClient(uSkt, maxUser);
 
                 uSkt.close();
@@ -76,15 +75,11 @@ public class Server4 {
 
     private void warteAufBefehl(User user, BufferedReader br, Thread thread) {
         try {
-            char[] buffer = new char[160];
-            int anzahlZeichen = br.read(buffer, 0, 160); // blockiert bis empfangen Nachricht
+            char[] buffer = new char[2000];
+            int anzahlZeichen = br.read(buffer, 0, 2000); // blockiert bis empfangen Nachricht
             String befehl = new String(buffer, 0, anzahlZeichen);
             Request userBefehl = gson.fromJson(befehl, Request.class);
-
-            if (userBefehl == null) {
-                schickeNachrichtAnClient(user.getSocket(), response);
-                warteAufBefehl(user, br, thread);
-            }
+            System.out.println(userBefehl);
 
             if (ueberpruefeBefehl(user, userBefehl)) {
                 if (isLogedIn(user)) {
@@ -98,14 +93,14 @@ public class Server4 {
                         hilfe(user, userBefehl);
                     } else if (userBefehl.getCommand().equals("time")) {
                         getTime(user, userBefehl);
-                    } else if (userBefehl.getCommand().startsWith("ls ")) {
+                    } else if (userBefehl.getCommand().equals("ls")) {
                         lsCommand(user, userBefehl);
                     } else if (userBefehl.getCommand().equals("who")) {
                         werIstAllesEingeloggt(user, userBefehl);
                     } else if (userBefehl.getCommand().startsWith("msg ")) {
                         nachricht(user, userBefehl);
                     } else if (userBefehl.getCommand().equals("exit")) {
-                        ende(user,null, thread);
+                        ende(user, null, thread);
                     } else {
                         antwort[0] = "Sie müssen diese Befehle richtig schreiben...\n" +
                                 "ls <Pfad>\n" +
@@ -114,39 +109,34 @@ public class Server4 {
                         response.setStatusCode(400);
                         response.setSequence(userBefehl.getSequence());
                         response.setRes(antwort);
-//                        schickeNachrichtAnClient(user.getSocket(), "Sie müssen diese Befehle richtig schreiben...\n" +
-//                                "ls <Pfad>\n" +
-//                                "msg <Client> <message>\n" +
-//                                "Hinweis: Vergessen Sie die Leerzeichen nicht ;)");
+                        schickeNachrichtAnClient(user.getSocket(), response);
                     }
                 } else {
                     if (userBefehl.getCommand().equals("exit")) {
                         ende(user, userBefehl, thread);
                     } else if (userBefehl.getCommand().equals("help")) {
                         hilfe(user, userBefehl);
-                    } else if (userBefehl.getCommand().startsWith("login ")) {
-                        //logIn(user, befehl.split(" ")[1]);
+                    } else if (userBefehl.getCommand().equals("login")) {
                         logIn(user, userBefehl);
                     } else {
-//                        schickeNachrichtAnClient(user.getSocket(),
-//                                "Korrekter Befehl, aber Sie m\u00E3ssen sich zuerst mit 'login <username>' einloggen.");
                         antwort[0] = "Korrekter Befehl, aber Sie m\u00E3ssen sich zuerst mit 'login <username>' einloggen.";
                         response.setStatusCode(401);
                         response.setSequence(userBefehl.getSequence());
                         response.setRes(antwort);
+                        schickeNachrichtAnClient(user.getSocket(), response);
+
                     }
 
                 }
             } else {
                 if (user.getName().equals("undefiniert")) {
-//                    schickeNachrichtAnClient(user.getSocket(),
-//                            "Sie m\u00E3ssen sich zuerst mit 'login <username>' einloggen.");
                     antwort[0] = "Sie m\u00E3ssen sich zuerst mit 'login <username>' einloggen.";
                     response.setStatusCode(401);
                     response.setSequence(userBefehl.getSequence());
                     response.setRes(antwort);
+                    schickeNachrichtAnClient(user.getSocket(), response);
+
                 } else {
-//                    schickeNachrichtAnClient(user.getSocket(), "Inkorrekter Befehl, bitte überprüfen!");
                     antwort[0] = "Sie müssen diese Befehle richtig schreiben...\n" +
                             "ls <Pfad>\n" +
                             "msg <Client> <message>\n" +
@@ -154,6 +144,7 @@ public class Server4 {
                     response.setStatusCode(400);
                     response.setSequence(userBefehl.getSequence());
                     response.setRes(antwort);
+                    schickeNachrichtAnClient(user.getSocket(), response);
                 }
             }
             if (!user.getSocket().isClosed()) {
@@ -161,19 +152,14 @@ public class Server4 {
             }
         } catch (Exception e) {
             System.out.println("User is raus");
-            //userList.remove(user);
-            ende(user, null,thread);
-// System.out.println(user.getName() + " hat ein Request geschickt.");
-//            if (isLogedIn(user)) {
-//                nachricht(user, "");
-//            } else {
-//            schickeNachrichtAnClient(user.getSocket(),
-//                    "Korrekter Befehl, aber Sie m\u00E3ssen sich zuerst mit 'login <username>' einloggen.");
+            System.out.println();
+            userList.remove(user);
+            ende(user, null, thread);
             antwort[0] = "Sie m\u00E3ssen sich zuerst mit 'login <username>' einloggen.";
             response.setStatusCode(401);
             response.setSequence(0);
             response.setRes(antwort);
-//            }
+            schickeNachrichtAnClient(user.getSocket(), response);
         }
     }
 
@@ -187,8 +173,6 @@ public class Server4 {
             response.setSequence(0);
             response.setRes(antwort);
 
-//            schickeNachrichtAnClient(user.getSocket(), "So geht´s nich, meen Jung! " +
-//                    "Sie k\u00D6nnen sich nicht selber schreiben..");
         } else {
             int index = 0;
             for (User u : userList) {
@@ -196,9 +180,6 @@ public class Server4 {
                 System.out.println(u.getName());
                 if (otherUserName.equals("all")) {
                     if (!(u.getName().equals(user.getName()))) {
-//                        schickeNachrichtAnClient(u.getSocket(),
-//                                time.getTime() + " " + user.getName() +
-//                                        " hat ihnen eine Nachricht geschickt.\n" + befehl + "\n");
                         antwort[0] = time.getTime() + " " + user.getName() + " hat ihnen eine Nachricht geschickt.\n" + befehl.getParams()[1] + "\n";
                         response.setStatusCode(200);
                         response.setSequence(befehl.getSequence());
@@ -210,9 +191,6 @@ public class Server4 {
 
                 }
                 if (u.getName().equals(otherUserName)) {
-//                    schickeNachrichtAnClient(u.getSocket(),
-//                            time.getTime() + " " + user.getName() +
-//                                    " hat ihnen eine Nachricht geschickt.\n" + befehl + "\n");
                     antwort[0] = time.getTime() + " " + user.getName() + " hat ihnen eine Nachricht geschickt.\n" + befehl.getParams()[1] + "\n";
                     response.setStatusCode(200);
                     response.setSequence(befehl.getSequence());
@@ -222,7 +200,6 @@ public class Server4 {
                 }
                 index++;
                 if (index == userList.size() || userList.size() != 1) {
-                    //schickeNachrichtAnClient(user.getSocket(), "Der angegebene Benutzername existiert nicht.");
                     antwort[0] = "Der angegebene Benutzername existiert nicht.";
                     response.setStatusCode(404);
                     response.setSequence(befehl.getSequence());
@@ -236,95 +213,26 @@ public class Server4 {
 
     }
 
-//    private static void antworteMitGson(User user, Request req, Thread thread) {
-//        try {
-//            Response response = new Response();
-//            response.setStatusCode(200);
-//            response.setSequence(req.getSequence() + 1);
-//
-//            String[] reqParams = req.getParams();
-//            String otherUserName = reqParams[0];
-//            response.setRes(req.getParams());
-//
-//            Gson gsBuilder = new GsonBuilder().create();
-//
-//
-//            if (user.getName().equals(otherUserName)) {
-//                schickeNachrichtAnClient(user.getSocket(), "So geht´s nich, meen Jung! " +
-//                        "Sie k\u00D6nnen sich nicht selber schreiben..");
-//            } else {
-//                for (User u : userList) {
-//                    if (otherUserName.equals("all")) {
-//                        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(u.getSocket().getOutputStream()));
-//                        gsBuilder.toJson(response, bw);
-//                        bw.flush();
-//                    } else if (u.getName().equals(otherUserName)) {
-//                        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(u.getSocket().getOutputStream()));
-//                        gsBuilder.toJson(response, bw);
-//                        bw.flush();
-//                    } else {
-//                        schickeNachrichtAnClient(user.getSocket(), "Der angegebene Benutzername existiert nicht.");
-//                    }
-//                }
-//
-//            }
-//
-//            warteAufBefehl(user, thread);
-//
-//        } catch (IOException e) {
-//            System.err.println("Beim Schicken im Json-Format ist uns ein Fehler unterlaufen, sorry :/");
-//        }
-//    }
 
     private void lsCommand(User user, Request befehl) {
-        //https://forum.ubuntuusers.de/topic/konsolenbefehl-mit-java/
-        //http://openbook.rheinwerk-verlag.de/javainsel/javainsel_11_008.html
-        //http://mrfoo.de/archiv/315-Verzeichnis-auslesen-in-Java.html
-        try {
-            String pfad = befehl.getParams()[0];
-            ProcessBuilder builder = new ProcessBuilder("cmd", "/c", "dir");
-            builder.directory(new File(pfad));
-            Process p = builder.start();
-
-            BufferedReader str = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-
-            String cache;
-            String stdout = "";
-            String stderr = "";
-
-            while ((cache = str.readLine()) != null) {
-                stdout += cache + "\n";
+        String pfad = befehl.getParams()[0];
+        File file = new File(pfad);
+        File[] fileArray = file.listFiles();
+        String[] liste = new String[fileArray.length];
+        for (int i = 0; i <= fileArray.length - 1; i++) {
+            if (fileArray[i].isDirectory()) {
+                liste[i] = fileArray[i].toString();
             }
-
-            while ((cache = err.readLine()) != null) {
-                stderr += cache + "\n";
-            }
-
-            str.close();
-            err.close();
-
-//        System.out.println(stdout);
-            System.out.println(stderr);
-            antwort[0] = stdout;
-            response.setStatusCode(200);
-            response.setRes(antwort);
-            schickeNachrichtAnClient(user.getSocket(), response);
-        } catch (IOException e) {
-            System.out.println("Error");
         }
+        response.setSequence(befehl.getSequence());
+        response.setStatusCode(200);
+        response.setRes(liste);
+        schickeNachrichtAnClient(user.getSocket(), response);
+
 
     }
 
     private void hilfe(User user, Request userBefehl) {
-//        schickeNachrichtAnClient(user.getSocket(), "m\u00F6gliche Befehle:\n\n" +
-//                "help                   - Bedienungshilfe wird ausgegeben\n" +
-//                "login <username>       - Anmeldung mit Buntzernamen\n" +
-//                "time                   - aktuelle Zeit\n" +
-//                "ls <Pfad>              - Dateiliste von <Pfad>\n" +
-//                "who                    - Liste mit verbundenen Clients\n" +
-//                "msg <Client> <message> - sendet Nachricht an <Client >\n" +
-//                "exit                   - Beenden und abmelden\n");
         antwort[0] = "m\u00F6gliche Befehle:\n\n" +
                 "help                   - Bedienungshilfe wird ausgegeben\n" +
                 "login <username>       - Anmeldung mit Buntzernamen\n" +
@@ -346,7 +254,6 @@ public class Server4 {
         response.setSequence(userBefehl.getSequence());
         response.setRes(antwort);
         schickeNachrichtAnClient(user.getSocket(), response);
-        //schickeNachrichtAnClient(user.getSocket(), "Die aktuelle Zeit ist " + time.getTime());
     }
 
     private void werIstAllesEingeloggt(User user, Request userBefehl) {
@@ -356,8 +263,7 @@ public class Server4 {
             response.setSequence(userBefehl.getSequence());
             response.setRes(antwort);
             schickeNachrichtAnClient(user.getSocket(), response);
-            //vllt muss man an dieser Stelle nochmal umschreiben um eine schönere Ausgabe zu erhalten
-            //schickeNachrichtAnClient(user.getSocket(), u.getName() + ", ");
+
         }
     }
 
@@ -373,7 +279,6 @@ public class Server4 {
             response.setSequence(userBefehl.getSequence());
             response.setRes(antwort);
             schickeNachrichtAnClient(user.getSocket(), response);
-            //schickeNachrichtAnClient(user.getSocket(), "Der Benutzername existiert bereits!");
         } else {
             user.setName(username);
             user.setLogedIn(true);
@@ -386,8 +291,7 @@ public class Server4 {
             response.setSequence(userBefehl.getSequence());
             response.setRes(antwort);
             schickeNachrichtAnClient(user.getSocket(), response);
-//            schickeNachrichtAnClient(user.getSocket(), "Hallo " + username +
-//                    ", Sie sind jetzt eingeloggt.\nViel Spaß mit der Mini Mailbox!");
+
         }
     }
 
@@ -395,7 +299,6 @@ public class Server4 {
         try {
             PrintWriter pw = new PrintWriter(new OutputStreamWriter(uSkt.getOutputStream()));
             pw.print(gsbu.toJson(nachricht));
-            //pw.print(nachricht);
             pw.flush();
         } catch (IOException e) {
             System.err.println("Beim Schreiben ist etwas schiefgegangen :/");
@@ -418,38 +321,25 @@ public class Server4 {
                 befehl.getCommand().startsWith("msg ") ||
                 befehl.getCommand().equals("who") ||
                 befehl.getCommand().equals("exit");
-
-//        return befehl.startsWith("login ") ||
-//                befehl.equals("login") ||
-//                befehl.equals("help") ||
-//                befehl.equals("time") ||
-//                befehl.equals("ls") ||
-//                befehl.startsWith("ls ") ||
-//                befehl.equals("msg") ||
-//                befehl.startsWith("msg ") ||
-//                befehl.equals("who") ||
-//                befehl.equals("exit");
     }
 
     /**
      * Beendet die Anwendung des Clients.
      */
-    private void ende(User user, Request userBefehl,Thread thread) {
+    private void ende(User user, Request userBefehl, Thread thread) {
         try {
-            if(userBefehl == null){
+            if (userBefehl == null) {
                 response.setStatusCode(204);
                 response.setSequence(0);
                 response.setRes(null);
                 schickeNachrichtAnClient(user.getSocket(), response);
-            }else{
+            } else {
                 antwort[0] = "Bis zum n\u00e4chsten mal " + user.getName() + "!";
                 response.setStatusCode(200);
                 response.setSequence(userBefehl.getSequence());
                 response.setRes(antwort);
                 schickeNachrichtAnClient(user.getSocket(), response);
             }
-
-            //schickeNachrichtAnClient(user.getSocket(), "Bis zum n\u00e4chsten mal " + user.getName() + "!");
             userList.remove(user);
             user.getSocket().close();
             for (User u : userList) System.out.println(u.getName());
