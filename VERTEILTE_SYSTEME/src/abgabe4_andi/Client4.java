@@ -15,7 +15,7 @@ public class Client4 {
 
     private Gson gson = new Gson();
     private Gson gsbu = new GsonBuilder().create();
-    private String[] parms;
+    private String[] parms = new String[5];
     private Request req;
 
 
@@ -96,15 +96,10 @@ public class Client4 {
      */
     void erstelleNachricht(Socket skt) {
         try {
-
             Request request = erstelleBefehl(skt);
             schickeNachrichten(skt, request);
             erstelleNachricht(skt);
-//            String befehl = erstelleBefehl(skt);
-//            schickeNachrichten(skt, befehl);
-//            erstelleNachricht(skt);
         } catch (Exception ex) {
-            System.out.println(ex);
             System.out.println("Fehlercode: -3\n" +
                     "Grund: 'Der Server ist down!'");
             System.out.println("Soll das Programm beendet werden? (Y/N)");
@@ -144,10 +139,6 @@ public class Client4 {
             req.setCommand(befehl);
             parms = new String[1];
             parms[0] = nachricht.replace(befehl + " ", "");
-//            for(int i = 0; i < nachricht.length(); i++){
-//                parms[i] = nachricht.split(" ")[i+1];
-//            }
-
             req.setParams(parms);
 
         } catch (IOException ioEx) {
@@ -164,30 +155,10 @@ public class Client4 {
      */
     void schickeNachrichten(Socket skt, Request nachricht) {
         try {
-//            String command = nachricht.split(" ")[0];
-//            if(command.equals("msg")){
-//                String empfänger = nachricht.split(" ")[1];
-//                System.out.println(nachricht);
-//                nachricht = nachricht.replace("msg ", "");
-//                System.out.println(nachricht);
-//                nachricht = nachricht.replace(empfänger+" ", "");
-//                System.out.println(nachricht);
-//
-//                String[] params = {empfänger, nachricht};
-//
-//                Request req = new Request();
-//                req.setCommand(command);
-//                req.setParams(params);
-//                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(skt.getOutputStream()));
-//                Gson gsBuilder = new GsonBuilder().create();
-//                gsBuilder.toJson(req, bw);
-//                bw.close();
-//
-//            } else {
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(skt.getOutputStream()));
+            System.out.println(nachricht);
             printWriter.print(gsbu.toJson(nachricht));
             printWriter.flush();
-//            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -213,36 +184,16 @@ public class Client4 {
 
                 if (response.getRes()[0].startsWith("Bis zum n")) {
                     System.out.println("abgemeldet..");
-//                thread.stop();
                     Runtime.getRuntime().exit(0);
                 }
-
-            } else {
-                System.out.println("leer");
             }
-            /**
-             TODO: Hier läuft was schief
-             Der Thread scheißt ne Exception
-             */
             leseNachrichten(skt, thread);
 
         } catch (IOException e) {
-//            try {
-//                System.out.println("Er ist wieder da!");
-//                BufferedReader br = new BufferedReader(new InputStreamReader(skt.getInputStream()));
-//                Gson gson = new Gson();
-//                Response response = gson.fromJson(br, Response.class);
-//                System.out.println(response);
-//                String[] resParams = response.getRes();
-//                System.out.println(resParams);
-//                String msg = resParams[1];
-//                System.out.println(msg);
-//            } catch (IOException e1) {
+
             System.out.println("Beim Lesen ist etwas schiefgegangen oder Sie haben sich abgemeldet :/");
             System.out.println("Verbindung zum Server verloren, Anwendung wird beendet.");
-//            thread.stop();
             Runtime.getRuntime().exit(0);
-//            }
         }
     }
 }
