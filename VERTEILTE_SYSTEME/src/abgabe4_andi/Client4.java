@@ -156,7 +156,7 @@ public class Client4 {
     void schickeNachrichten(Socket skt, Request nachricht) {
         try {
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(skt.getOutputStream()));
-            System.out.println(nachricht);
+//            System.out.println(nachricht);
             printWriter.print(gsbu.toJson(nachricht));
             printWriter.flush();
         } catch (IOException e) {
@@ -172,13 +172,13 @@ public class Client4 {
      * @throws IOException wird in erstelleNachricht gefangen und ausgewertet
      */
     void leseNachrichten(Socket skt, Thread thread) {
-        String mail = "";
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(skt.getInputStream()));
             char[] buffer = new char[2000];
             int anzahlZeichen = br.read(buffer, 0, 2000); // blockiert bis empfangen Nachricht
-            mail = new String(buffer, 0, anzahlZeichen);
+            String mail = new String(buffer, 0, anzahlZeichen);
             Response response = gson.fromJson(mail, Response.class);
+//            response.getRes();
             System.out.println("Antwort des Servers: " + response);
             if (response.getRes() != null) {
 

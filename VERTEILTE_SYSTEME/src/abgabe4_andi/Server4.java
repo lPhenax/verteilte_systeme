@@ -83,7 +83,7 @@ public class Server4 {
 
             if (ueberpruefeBefehl(user, userBefehl)) {
                 if (isLogedIn(user)) {
-                    if (userBefehl.getCommand().startsWith("login ")) {
+                    if (userBefehl.getCommand().equals("login")) {
                         antwort[0] = user.getName() + ", Sie sind bereits eingeloggt ;)";
                         response.setStatusCode(400);
                         response.setSequence(userBefehl.getSequence());
@@ -215,7 +215,12 @@ public class Server4 {
 
 
     private void lsCommand(User user, Request befehl) {
-        String pfad = befehl.getParams()[0];
+        String pfad = "";
+        if (befehl.getParams()[0].equals("") || befehl.getParams()[0].isEmpty()) {
+            pfad = "c:/";
+        } else {
+            pfad = befehl.getParams()[0];
+        }
         File file = new File(pfad);
         File[] fileArray = file.listFiles();
         String[] liste = new String[fileArray.length];
@@ -311,14 +316,11 @@ public class Server4 {
 
     private static boolean ueberpruefeBefehl(User user, Request befehl) {
         System.out.println("user : " + user.getName() + " --- Befehl : " + befehl.getCommand());
-        return befehl.getCommand().startsWith("login ") ||
-                befehl.getCommand().equals("login") ||
+        return befehl.getCommand().equals("login") ||
                 befehl.getCommand().equals("help") ||
                 befehl.getCommand().equals("time") ||
                 befehl.getCommand().equals("ls") ||
-                befehl.getCommand().startsWith("ls ") ||
                 befehl.getCommand().equals("msg") ||
-                befehl.getCommand().startsWith("msg ") ||
                 befehl.getCommand().equals("who") ||
                 befehl.getCommand().equals("exit");
     }
@@ -328,18 +330,11 @@ public class Server4 {
      */
     private void ende(User user, Request userBefehl, Thread thread) {
         try {
-            if (userBefehl == null) {
-                response.setStatusCode(204);
-                response.setSequence(0);
-                response.setRes(null);
-                schickeNachrichtAnClient(user.getSocket(), response);
-            } else {
-                antwort[0] = "Bis zum n\u00e4chsten mal " + user.getName() + "!";
-                response.setStatusCode(200);
-                response.setSequence(userBefehl.getSequence());
-                response.setRes(antwort);
-                schickeNachrichtAnClient(user.getSocket(), response);
-            }
+            antwort[0] = "Bis zum n\u00e4chsten mal " + user.getName() + "!";
+            response.setStatusCode(200);
+            response.setSequence(userBefehl.getSequence());
+            response.setRes(antwort);
+            schickeNachrichtAnClient(user.getSocket(), response);
             userList.remove(user);
             user.getSocket().close();
             for (User u : userList) System.out.println(u.getName());
