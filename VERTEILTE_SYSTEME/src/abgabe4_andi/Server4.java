@@ -102,7 +102,7 @@ public class Server4 {
                     } else if (userBefehl.getCommand().equals("msg")) {
                         nachricht(user, userBefehl);
                     } else if (userBefehl.getCommand().equals("exit")) {
-                        ende(user, null, thread);
+                        ende(user, userBefehl, thread);
                     } else {
                         antwort[0] = "Sie müssen diese Befehle richtig schreiben...\n" +
                                 "ls <Pfad>\n" +
@@ -172,14 +172,14 @@ public class Server4 {
         String otherUserName = befehl.getParams()[0].split(" ")[0];
         String msg = befehl.getParams()[0].replace(otherUserName + " ", "");
         Time time = new Time();
+        boolean all = false;
         if (user.getName().equals(otherUserName)) {
             antwort[0] = "So geht´s nich, meen Jung! Sie k\u00D6nnen sich nicht selber schreiben..";
             response.setStatusCode(400);
             response.setSequence(0);
             response.setRes(antwort);
-
+            schickeNachrichtAnClient(user.getSocket(), response);
         } else {
-            int index = 0;
             for (User u : userList) {
                 System.out.println(otherUserName);
                 System.out.println(u.getName());
@@ -194,24 +194,27 @@ public class Server4 {
                         continue;
                     }
 
+                    all = true;
+                }
+                if(!all){
+                    if (u.getName().equals(otherUserName)) {
+                        if(isLogedIn(u)){
+                            antwort[0] = time.getTime() + " " + user.getName() + " hat ihnen eine Nachricht geschickt.\n" +
+                                    msg + "\n";
+                            response.setStatusCode(200);
+                            response.setSequence(befehl.getSequence());
+                            response.setRes(antwort);
+                            schickeNachrichtAnClient(u.getSocket(), response);
+                        } else {
+                            antwort[0] = "Der angegebene Benutzername existiert nicht bzw. ist nicht eingeloggt.";
+                            response.setStatusCode(404);
+                            response.setSequence(befehl.getSequence());
+                            response.setRes(antwort);
+                            schickeNachrichtAnClient(u.getSocket(), response);
+                        }
 
-                }
-                if (u.getName().equals(otherUserName)) {
-                    antwort[0] = time.getTime() + " " + user.getName() + " hat ihnen eine Nachricht geschickt.\n" +
-                            msg + "\n";
-                    response.setStatusCode(200);
-                    response.setSequence(befehl.getSequence());
-                    response.setRes(antwort);
-                    schickeNachrichtAnClient(u.getSocket(), response);
-                    break;
-                }
-                index++;
-                if (index == userList.size() || userList.size() != 1) {
-                    antwort[0] = "Der angegebene Benutzername existiert nicht.";
-                    response.setStatusCode(404);
-                    response.setSequence(befehl.getSequence());
-                    response.setRes(antwort);
-                    schickeNachrichtAnClient(u.getSocket(), response);
+                        break;
+                    }
                 }
 
             }
@@ -273,14 +276,19 @@ public class Server4 {
     }
 
     private void werIstAllesEingeloggt(User user, Request userBefehl) {
+        String uNameList = "";
         for (User u : userList) {
-            antwort[0] = u.getName() + ", ";
-            response.setStatusCode(200);
-            response.setSequence(userBefehl.getSequence());
-            response.setRes(antwort);
-            schickeNachrichtAnClient(user.getSocket(), response);
-
+            if(uNameList.equals("") || uNameList.isEmpty()){
+                uNameList = uNameList + u.getName();
+            } else {
+                uNameList = uNameList + ", " + u.getName();
+            }
         }
+        antwort[0] = uNameList;
+        response.setStatusCode(200);
+        response.setSequence(userBefehl.getSequence());
+        response.setRes(antwort);
+        schickeNachrichtAnClient(user.getSocket(), response);
     }
 
     private void logIn(User user, Request userBefehl) {
