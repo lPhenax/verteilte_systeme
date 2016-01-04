@@ -139,6 +139,9 @@ public class Client4 {
             req.setCommand(befehl);
             parms = new String[1];
             parms[0] = nachricht.replace(befehl, "");
+            if(parms[0].startsWith(" ")) {
+                parms[0] = nachricht.replace(befehl + " ", "");
+            }
             req.setParams(parms);
             //System.out.println(parms[0]);
 
@@ -180,8 +183,16 @@ public class Client4 {
             String mail = new String(buffer, 0, anzahlZeichen);
             Response response = gson.fromJson(mail, Response.class);
 //            response.getRes();
-            //System.out.println("Antwort des Servers: " + response);
-            System.out.println("Antwort: " + response.getRes()[0]);
+            System.out.println("Antwort des Servers: ");
+            for(int i = 0; i <= response.getRes().length-1; i++){
+                if(response.getRes()[i] == null){
+
+                }else{
+                    System.out.println(response.getRes()[i]);
+
+                }
+            }
+            //System.out.println("Antwort: " + response.getRes()[0]);
             if (response.getRes() != null) {
 
                 if (response.getRes()[0].startsWith("Bis zum n")) {
@@ -189,6 +200,7 @@ public class Client4 {
                     Runtime.getRuntime().exit(0);
                 }
             }
+            System.out.print("$> ");
             leseNachrichten(skt, thread);
 
         } catch (IOException e) {
