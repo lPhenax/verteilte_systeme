@@ -80,8 +80,8 @@ public class Server4 {
             int anzahlZeichen = br.read(buffer, 0, 2000); // blockiert bis empfangen Nachricht
             String befehl = new String(buffer, 0, anzahlZeichen);
             Request userBefehl = gson.fromJson(befehl, Request.class);
-            System.out.println(userBefehl);
-            System.out.println(userBefehl.getParams()[0]);
+//            System.out.println(userBefehl);
+//            System.out.println(userBefehl.getParams()[0]);
 
             if (ueberpruefeBefehl(user, userBefehl)) {
                 if (isLogedIn(user)) {
@@ -126,7 +126,6 @@ public class Server4 {
                         response.setSequence(userBefehl.getSequence());
                         response.setRes(antwort);
                         schickeNachrichtAnClient(user.getSocket(), response);
-
                     }
 
                 }
@@ -153,7 +152,7 @@ public class Server4 {
                 warteAufBefehl(user, br, thread);
             }
         } catch (Exception e) {
-            System.out.println("User is raus");
+            System.out.println("User '" + user.getName() + "' ist raus.");
             System.out.println();
             userList.remove(user);
             ende(user, null, thread);
@@ -234,19 +233,26 @@ public class Server4 {
         }
         System.out.println("pfad: " +pfad);
         File file = new File(pfad);
-
         File[] fileArray = file.listFiles();
-        String[] liste = new String[fileArray.length];
-        for (int i = 0; i <= fileArray.length - 1; i++) {
-            if (fileArray[i].isDirectory()) {
-                liste[i] = fileArray[i].toString();
+        try{
+            String[] liste = new String[fileArray.length];
+            for (int i = 0; i <= fileArray.length - 1; i++) {
+                if (fileArray[i].isDirectory()) {
+                    liste[i] = fileArray[i].toString();
+                }
             }
+            response.setSequence(befehl.getSequence());
+            response.setStatusCode(200);
+            response.setRes(liste);
+            schickeNachrichtAnClient(user.getSocket(), response);
+        } catch (Exception ex){
+            response.setSequence(befehl.getSequence());
+            response.setStatusCode(200);
+            String[] liste = new String[1];
+            liste[0] = "Diesen Pfad gibts nicht.";
+            response.setRes(liste);
+            schickeNachrichtAnClient(user.getSocket(), response);
         }
-//        System.out.println(liste[0]);
-        response.setSequence(befehl.getSequence());
-        response.setStatusCode(200);
-        response.setRes(liste);
-        schickeNachrichtAnClient(user.getSocket(), response);
 
 
     }
