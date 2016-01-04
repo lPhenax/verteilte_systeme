@@ -74,6 +74,7 @@ public class Server4 {
     }
 
     private void warteAufBefehl(User user, BufferedReader br, Thread thread) {
+        System.out.println("ich bin am warten");
         try {
             char[] buffer = new char[2000];
             int anzahlZeichen = br.read(buffer, 0, 2000); // blockiert bis empfangen Nachricht
@@ -215,13 +216,17 @@ public class Server4 {
 
 
     private void lsCommand(User user, Request befehl) {
-        String pfad = "";
-        if (befehl.getParams()[0].equals("") || befehl.getParams()[0].isEmpty()) {
-            pfad = "c:/";
-        } else {
-            pfad = befehl.getParams()[0];
+//        System.out.println(user.getName());
+//        System.out.println(befehl);
+
+        String pfad = befehl.getParams()[0];
+//        System.out.println(befehl.getParams()[0]);
+        if (pfad.equals("")|| pfad.isEmpty()) {
+            pfad = "c:\\";
         }
+        System.out.println("pfad: " +pfad);
         File file = new File(pfad);
+
         File[] fileArray = file.listFiles();
         String[] liste = new String[fileArray.length];
         for (int i = 0; i <= fileArray.length - 1; i++) {
@@ -229,6 +234,7 @@ public class Server4 {
                 liste[i] = fileArray[i].toString();
             }
         }
+//        System.out.println(liste[0]);
         response.setSequence(befehl.getSequence());
         response.setStatusCode(200);
         response.setRes(liste);
