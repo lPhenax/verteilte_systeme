@@ -81,6 +81,7 @@ public class Server4 {
             String befehl = new String(buffer, 0, anzahlZeichen);
             Request userBefehl = gson.fromJson(befehl, Request.class);
             System.out.println(userBefehl);
+            System.out.println(userBefehl.getParams()[0]);
 
             if (ueberpruefeBefehl(user, userBefehl)) {
                 if (isLogedIn(user)) {
@@ -98,7 +99,7 @@ public class Server4 {
                         lsCommand(user, userBefehl);
                     } else if (userBefehl.getCommand().equals("who")) {
                         werIstAllesEingeloggt(user, userBefehl);
-                    } else if (userBefehl.getCommand().startsWith("msg ")) {
+                    } else if (userBefehl.getCommand().equals("msg")) {
                         nachricht(user, userBefehl);
                     } else if (userBefehl.getCommand().equals("exit")) {
                         ende(user, null, thread);
@@ -165,8 +166,11 @@ public class Server4 {
     }
 
     private void nachricht(User user, Request befehl) {
+//        System.out.println("User '" + user.getName() + "' hat folgenden Befehl gesendet: '" + befehl + "'");
+//        System.out.println("befehl.getParams()[0]: " + befehl.getParams()[0]);
 
-        String otherUserName = befehl.getParams()[0];
+        String otherUserName = befehl.getParams()[0].split(" ")[0];
+        String msg = befehl.getParams()[0].replace(otherUserName + " ", "");
         Time time = new Time();
         if (user.getName().equals(otherUserName)) {
             antwort[0] = "So geht´s nich, meen Jung! Sie k\u00D6nnen sich nicht selber schreiben..";
@@ -181,7 +185,8 @@ public class Server4 {
                 System.out.println(u.getName());
                 if (otherUserName.equals("all")) {
                     if (!(u.getName().equals(user.getName()))) {
-                        antwort[0] = time.getTime() + " " + user.getName() + " hat ihnen eine Nachricht geschickt.\n" + befehl.getParams()[1] + "\n";
+                        antwort[0] = time.getTime() + " " + user.getName() + " hat ihnen eine Nachricht geschickt.\n" +
+                                msg + "\n";
                         response.setStatusCode(200);
                         response.setSequence(befehl.getSequence());
                         response.setRes(antwort);
@@ -192,7 +197,8 @@ public class Server4 {
 
                 }
                 if (u.getName().equals(otherUserName)) {
-                    antwort[0] = time.getTime() + " " + user.getName() + " hat ihnen eine Nachricht geschickt.\n" + befehl.getParams()[1] + "\n";
+                    antwort[0] = time.getTime() + " " + user.getName() + " hat ihnen eine Nachricht geschickt.\n" +
+                            msg + "\n";
                     response.setStatusCode(200);
                     response.setSequence(befehl.getSequence());
                     response.setRes(antwort);
@@ -213,7 +219,6 @@ public class Server4 {
         }
 
     }
-
 
     private void lsCommand(User user, Request befehl) {
 //        System.out.println(user.getName());
