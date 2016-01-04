@@ -20,7 +20,7 @@ public class Server4 {
     private Gson gson = new Gson();
     private Gson gsbu = new GsonBuilder().create();
     private Response response = new Response(0, 0, null);
-    private String[] antwort = new String[5];
+    private String[] antwort = new String[1];
 
     public static void main(String[] args) {
         new Server4();
@@ -50,6 +50,11 @@ public class Server4 {
     private void clientBehandlung() {
         try {
             Socket uSkt = listen.accept();
+            antwort[0] = "Willkommen bei der Min-Mailbox.\nVerbindung steht.";
+            response.setStatuscode(200);
+            response.setSequence(0);
+            response.setResponse(antwort);
+            schickeNachrichtAnClient(uSkt, response);
             if (userList.size() < MAXCONNECTIONS) {
 
                 User user = new User(uSkt);
@@ -87,9 +92,9 @@ public class Server4 {
                 if (isLogedIn(user)) {
                     if (userBefehl.getCommand().equals("login")) {
                         antwort[0] = user.getName() + ", Sie sind bereits eingeloggt ;)";
-                        response.setStatusCode(400);
+                        response.setStatuscode(400);
                         response.setSequence(userBefehl.getSequence());
-                        response.setRes(antwort);
+                        response.setResponse(antwort);
                         schickeNachrichtAnClient(user.getSocket(), response);
                     } else if (userBefehl.getCommand().equals("help")) {
                         hilfe(user, userBefehl);
@@ -108,9 +113,9 @@ public class Server4 {
                                 "ls <Pfad>\n" +
                                 "msg <Client> <message>\n" +
                                 "Hinweis: Vergessen Sie die Leerzeichen nicht ;)";
-                        response.setStatusCode(400);
+                        response.setStatuscode(400);
                         response.setSequence(userBefehl.getSequence());
-                        response.setRes(antwort);
+                        response.setResponse(antwort);
                         schickeNachrichtAnClient(user.getSocket(), response);
                     }
                 } else {
@@ -122,9 +127,9 @@ public class Server4 {
                         logIn(user, userBefehl);
                     } else {
                         antwort[0] = "Korrekter Befehl, aber Sie m\u00E3ssen sich zuerst mit 'login <username>' einloggen.";
-                        response.setStatusCode(401);
+                        response.setStatuscode(401);
                         response.setSequence(userBefehl.getSequence());
-                        response.setRes(antwort);
+                        response.setResponse(antwort);
                         schickeNachrichtAnClient(user.getSocket(), response);
                     }
 
@@ -132,9 +137,9 @@ public class Server4 {
             } else {
                 if (user.getName().equals("undefiniert")) {
                     antwort[0] = "Sie m\u00E3ssen sich zuerst mit 'login <username>' einloggen.";
-                    response.setStatusCode(401);
+                    response.setStatuscode(401);
                     response.setSequence(userBefehl.getSequence());
-                    response.setRes(antwort);
+                    response.setResponse(antwort);
                     schickeNachrichtAnClient(user.getSocket(), response);
 
                 } else {
@@ -142,9 +147,9 @@ public class Server4 {
                             "ls <Pfad>\n" +
                             "msg <Client> <message>\n" +
                             "Hinweis: Vergessen Sie die Leerzeichen nicht ;)";
-                    response.setStatusCode(400);
+                    response.setStatuscode(400);
                     response.setSequence(userBefehl.getSequence());
-                    response.setRes(antwort);
+                    response.setResponse(antwort);
                     schickeNachrichtAnClient(user.getSocket(), response);
                 }
             }
@@ -157,9 +162,9 @@ public class Server4 {
             userList.remove(user);
             ende(user, null, thread);
             antwort[0] = "Sie m\u00E3ssen sich zuerst mit 'login <username>' einloggen.";
-            response.setStatusCode(401);
+            response.setStatuscode(401);
             response.setSequence(0);
-            response.setRes(antwort);
+            response.setResponse(antwort);
             schickeNachrichtAnClient(user.getSocket(), response);
         }
     }
@@ -174,9 +179,9 @@ public class Server4 {
         boolean all = false;
         if (user.getName().equals(otherUserName)) {
             antwort[0] = "So geht´s nich, meen Jung! Sie k\u00D6nnen sich nicht selber schreiben..";
-            response.setStatusCode(400);
+            response.setStatuscode(400);
             response.setSequence(0);
-            response.setRes(antwort);
+            response.setResponse(antwort);
             schickeNachrichtAnClient(user.getSocket(), response);
         } else {
             for (User u : userList) {
@@ -186,9 +191,9 @@ public class Server4 {
                     if (!(u.getName().equals(user.getName()))) {
                         antwort[0] = time.getTime() + " " + user.getName() + " hat ihnen eine Nachricht geschickt.\n" +
                                 msg + "\n";
-                        response.setStatusCode(200);
+                        response.setStatuscode(200);
                         response.setSequence(befehl.getSequence());
-                        response.setRes(antwort);
+                        response.setResponse(antwort);
                         schickeNachrichtAnClient(u.getSocket(), response);
                         continue;
                     }
@@ -200,15 +205,15 @@ public class Server4 {
                         if(isLogedIn(u)){
                             antwort[0] = time.getTime() + " " + user.getName() + " hat ihnen eine Nachricht geschickt.\n" +
                                     msg + "\n";
-                            response.setStatusCode(200);
+                            response.setStatuscode(200);
                             response.setSequence(befehl.getSequence());
-                            response.setRes(antwort);
+                            response.setResponse(antwort);
                             schickeNachrichtAnClient(u.getSocket(), response);
                         } else {
                             antwort[0] = "Der angegebene Benutzername existiert nicht bzw. ist nicht eingeloggt.";
-                            response.setStatusCode(404);
+                            response.setStatuscode(404);
                             response.setSequence(befehl.getSequence());
-                            response.setRes(antwort);
+                            response.setResponse(antwort);
                             schickeNachrichtAnClient(u.getSocket(), response);
                         }
 
@@ -237,20 +242,20 @@ public class Server4 {
         try{
             String[] liste = new String[fileArray.length];
             for (int i = 0; i <= fileArray.length - 1; i++) {
-                if (fileArray[i].isDirectory()) {
+//                if (fileArray[i].isDirectory()) {
                     liste[i] = fileArray[i].toString();
-                }
+//                }
             }
             response.setSequence(befehl.getSequence());
-            response.setStatusCode(200);
-            response.setRes(liste);
+            response.setStatuscode(200);
+            response.setResponse(liste);
             schickeNachrichtAnClient(user.getSocket(), response);
         } catch (Exception ex){
             response.setSequence(befehl.getSequence());
-            response.setStatusCode(200);
+            response.setStatuscode(200);
             String[] liste = new String[1];
             liste[0] = "Diesen Pfad gibts nicht.";
-            response.setRes(liste);
+            response.setResponse(liste);
             schickeNachrichtAnClient(user.getSocket(), response);
         }
 
@@ -266,8 +271,8 @@ public class Server4 {
                 "who                    - Liste mit verbundenen Clients\n" +
                 "msg <Client> <message> - sendet Nachricht an <Client >\n" +
                 "exit                   - Beenden und abmelden\n";
-        response.setStatusCode(200);
-        response.setRes(antwort);
+        response.setStatuscode(200);
+        response.setResponse(antwort);
         response.setSequence(userBefehl.getSequence());
         schickeNachrichtAnClient(user.getSocket(), response);
     }
@@ -275,9 +280,9 @@ public class Server4 {
     private void getTime(User user, Request userBefehl) {
         Time time = new Time();
         antwort[0] = "Die aktuelle Zeit ist " + time.getTime();
-        response.setStatusCode(200);
+        response.setStatuscode(200);
         response.setSequence(userBefehl.getSequence());
-        response.setRes(antwort);
+        response.setResponse(antwort);
         schickeNachrichtAnClient(user.getSocket(), response);
     }
 
@@ -291,9 +296,9 @@ public class Server4 {
             }
         }
         antwort[0] = uNameList;
-        response.setStatusCode(200);
+        response.setStatuscode(200);
         response.setSequence(userBefehl.getSequence());
-        response.setRes(antwort);
+        response.setResponse(antwort);
         schickeNachrichtAnClient(user.getSocket(), response);
     }
 
@@ -305,9 +310,9 @@ public class Server4 {
         }
         if (istDerUserSchonVorhanden) {
             antwort[0] = "Der Benutzername existiert bereits!";
-            response.setStatusCode(200);
+            response.setStatuscode(200);
             response.setSequence(userBefehl.getSequence());
-            response.setRes(antwort);
+            response.setResponse(antwort);
             schickeNachrichtAnClient(user.getSocket(), response);
         } else {
             user.setName(username);
@@ -317,9 +322,9 @@ public class Server4 {
             for (User u : userList) System.out.println(u.getName());
 
             antwort[0] = "Hallo " + username + ", Sie sind jetzt eingeloggt.\nViel Spaß mit der Mini Mailbox!";
-            response.setStatusCode(200);
+            response.setStatuscode(200);
             response.setSequence(userBefehl.getSequence());
-            response.setRes(antwort);
+            response.setResponse(antwort);
             schickeNachrichtAnClient(user.getSocket(), response);
 
         }
@@ -356,9 +361,9 @@ public class Server4 {
     private void ende(User user, Request userBefehl, Thread thread) {
         try {
             antwort[0] = "Bis zum n\u00e4chsten mal " + user.getName() + "!";
-            response.setStatusCode(200);
+            response.setStatuscode(200);
             response.setSequence(userBefehl.getSequence());
-            response.setRes(antwort);
+            response.setResponse(antwort);
             schickeNachrichtAnClient(user.getSocket(), response);
             userList.remove(user);
             user.getSocket().close();

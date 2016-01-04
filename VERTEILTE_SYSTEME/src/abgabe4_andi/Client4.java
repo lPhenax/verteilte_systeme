@@ -184,18 +184,18 @@ public class Client4 {
             Response response = gson.fromJson(mail, Response.class);
 //            response.getRes();
             System.out.println("Antwort des Servers: ");
-            for(int i = 0; i <= response.getRes().length-1; i++){
-                if(response.getRes()[i] == null){
+            for(int i = 0; i <= response.getResponse().length-1; i++){
+                if(response.getResponse()[i] == null){
 
                 }else{
-                    System.out.println(response.getRes()[i]);
+                    System.out.println(response.getResponse()[i]);
 
                 }
             }
             //System.out.println("Antwort: " + response.getRes()[0]);
-            if (response.getRes() != null) {
+            if (response.getResponse() != null) {
 
-                if (response.getRes()[0].startsWith("Bis zum n")) {
+                if (response.getResponse()[0].startsWith("Bis zum n")) {
                     System.out.println("abgemeldet..");
                     Runtime.getRuntime().exit(0);
                 }

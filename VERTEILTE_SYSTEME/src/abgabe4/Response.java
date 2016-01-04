@@ -7,25 +7,25 @@ import java.util.Arrays;
  */
 public class Response {
 
-    private int statusCode;
+    private int statuscode;
     private int sequence;
-    private String[] res;
+    private String[] response;
 
     public Response() {
     }
 
-    public Response(int statusCode, int sequence, String[] res) {
-        this.statusCode = statusCode;
+    public Response(int statuscode, int sequence, String[] response) {
+        this.statuscode = statuscode;
         this.sequence = sequence;
-        this.res = res;
+        this.response = response;
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    public int getStatuscode() {
+        return statuscode;
     }
 
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
+    public void setStatuscode(int statuscode) {
+        this.statuscode = statuscode;
     }
 
     public int getSequence() {
@@ -36,20 +36,20 @@ public class Response {
         this.sequence = sequence;
     }
 
-    public String[] getRes() {
-        return res;
+    public String[] getResponse() {
+        return response;
     }
 
-    public void setRes(String[] res) {
-        this.res = res;
+    public void setResponse(String[] response) {
+        this.response = response;
     }
 
     @Override
     public String toString() {
         return "Response{" +
-                "statusCode=" + statusCode +
+                "statuscode=" + statuscode +
                 ", sequence=" + sequence +
-                ", res=" + Arrays.toString(res) +
+                ", response=" + Arrays.toString(response) +
                 '}';
     }
 }
