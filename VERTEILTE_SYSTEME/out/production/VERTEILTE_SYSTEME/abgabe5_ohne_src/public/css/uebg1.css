@@ -1,0 +1,160 @@
+/**
+ * @author Andreas Burger, Vivien Ebert & Daniel Schleußner
+ */
+
+body {
+    /*margin: 0, auto;*/
+    font-size: 1em;
+    font-weight: bold;
+}
+
+section {
+    border: dotted;
+    float: left;
+    width: 70%;
+    text-align: center;
+    background: #e0ffc1;
+    padding-top: 2%;
+    padding-bottom: 2%;
+}
+.div_video {
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+video {
+    /* video border */
+    border: 1px solid #eee;
+    padding: 2%;
+    width: 90%;
+    border-radius: 2%;
+    -moz-transition: all 1s ease-in-out;
+    -webkit-transition: all 1s ease-in-out;
+    transition: all 1s ease-in-out;
+}
+
+#btn_play_pause {
+    border: 1px solid #eee;
+    padding: 2%;
+    width: 20%;
+    border-radius: 20px;
+    -moz-transition: all 1s ease-in-out;
+    -webkit-transition: all 1s ease-in-out;
+    transition: all 1s ease-in-out;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.btn {
+    border: 1px solid #eee;
+    padding: 2%;
+    width: 15%;
+    border-radius: 20px;
+    -moz-transition: all 1s ease-in-out;
+    -webkit-transition: all 1s ease-in-out;
+    transition: all 1s ease-in-out;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+/* background color and gradient */
+video, .btn {
+    /* background color */
+    background-color: #35D100;
+    /* background gradient */
+    background-image: linear-gradient(top, #fff, #35D100);
+    background-image: -moz-linear-gradient(top, #fff, #35D100);
+    background-image: -webkit-linear-gradient(top, #fff, #35D100);
+}
+
+#new-video{
+    /*text-align: center;*/
+}
+
+#sendbutton{
+    width: 40%;
+}
+
+#slider_videotime {
+    width: 55%;
+}
+
+#sideContent {
+    float: right;
+    width: 28.5%;
+}
+
+#btn2_play_pause, #btn2_reset {
+    border: 1px solid #eee;
+    padding: 2%;
+    width: 40%;
+    border-radius: 20px;
+    -moz-transition: all 1s ease-in-out;
+    -webkit-transition: all 1s ease-in-out;
+    transition: all 1s ease-in-out;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+footer {
+    clear: both;
+    text-align: center;
+}
+
+@media only screen and (max-width: 480px) {
+    /* Bereiche*/
+    section {
+        width: 100%;
+        margin-right: -5%;
+        margin-left: -5%;
+    }
+
+    .div_video {
+        font-size: 0.8em;
+    }
+
+    #div_btnBar {
+        float: left;
+        width: 30%;
+        height: auto;
+    }
+
+    #div_slider {
+        float: left;
+        width: 30%;
+    }
+
+    /* Elemente */
+    video {
+        float: left;
+        width: 60%;
+        margin-right: 5%;
+    }
+
+    .btn {
+        padding: 2%;
+        width: 90%;
+        float: right;
+        border-radius: 5px;
+        font-size: 0.6em;
+        font-weight: 100;
+    }
+
+    /* aside-Bereich */
+    #sideContent {
+        margin-top: 10%;
+        margin-bottom: 10%;
+        float: left;
+        width: 100%;
+    }
+
+    /* Elemente */
+    #btn2_play_pause, #btn2_reset {
+        padding: 2%;
+        width: 20%;
+        border-radius: 5px;
+        font-size: 0.6em;
+        font-weight: 100;
+    }
+
+}

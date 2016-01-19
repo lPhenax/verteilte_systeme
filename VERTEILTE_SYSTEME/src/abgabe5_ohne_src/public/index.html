@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>VS - Übg5</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="chat, html, JavaScript, CSS, Java">
+    <meta name="discription" content="Chatapplication">
+    <meta name="author" content="Burger, Schleußner">
+    <!--<link href="css/uebg1.css" rel="stylesheet" type="text/css">-->
+    <script data-main="js/appclient" src="js/require.js"></script>
+</head>
+<body>
+<header>
+    <div id="new-user">
+        <h2>Hallo!</h2>
+        <h4>Bitte geben Sie ihren Benutzernamen ein.</h4>
+        <input type="text" id="username" placeholder="Mustermann">
+        <button type="button">Login</button>
+    </div>
+</header>
+<aside style="float: right">
+    <h3>angemeldete Benutzer</h3>
+    <div id="user-list" ></div>
+</aside>
+<main>
+    <div id="chat-app">
+        <div id="message-list"></div>
+        <input type="text" id="messageinput" placeholder="help">
+        <button type="button">abschicken</button>
+    </div>
+</main>
+<footer>
+    <details>
+        <span>Diese Abgabe ist von Andreas Burger(s812576) und Daniel Schleußner(s793388).</span>
+    </details>
+</footer>
+
+<script type="text/template" id="user-template">
+    <div><span><%= name %></span></div>
+</script>
+<script type="text/template" id="message-list-template">
+    <span>[<%= timestamp %>] <%= command %></span>
+</script>
+
+</body>
+</html>
